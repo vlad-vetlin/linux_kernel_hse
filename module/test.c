@@ -128,7 +128,7 @@ static void __exit test_cleanup(void)
 module_init(test_init);
 module_exit(test_cleanup);
 
-MODULE_DESCRIPTION("Generate a random Linus Torvalds quote he never said");
+MODULE_DESCRIPTION("Simple phone book");
 MODULE_LICENSE("GPL v2");
-MODULE_AUTHOR("Dmitry Torilov <dmtorilov@edu.hse.ru>");
+MODULE_AUTHOR("Vetlin Vladislav <vsvetlin@edu.hse.ru>");
 MODULE_SUPPORTED_DEVICE("test");
