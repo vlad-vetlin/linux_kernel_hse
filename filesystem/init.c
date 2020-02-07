@@ -14,4 +14,5 @@ int main() {
     }
 
     free_filesystem(fs);
+    free(fs);
 }
