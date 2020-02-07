@@ -1,17 +1,29 @@
 #include "system.h"
 #include "sector_map.h"
 #include <stdio.h>
+#include "sector.h"
 
 int main() {
     struct Filesystem *fs = malloc(sizeof(fs));
-    int i;
 
     init_filesystem(fs);
 
-    for (i = 0; i < 100; ++i) {
-        printf("%ld\n", get_number_of_first_empty_sector(fs));
-        reserve_first_sector_on_map(fs);
-    }
+    size_t sector = make_sector(fs);
+
+    update_sector(fs, sector, "test\ntest\n\0");
+    
+    print_sector(fs, sector);
+
+    update_sector(fs, sector, "kek\n\0");
+
+    print_sector(fs, sector);
+
+    size_t sector_2 = make_sector(fs);
+
+    update_sector(fs, sector_2, "zu\n\0");
+
+    print_sector(fs, sector);
+    print_sector(fs, sector_2);
 
     free_filesystem(fs);
     free(fs);

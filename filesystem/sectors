@@ -1,0 +1,23 @@
+Двоичный файл a.out совпадает
+sector_map.h:    size_t byte_number = -1;
+sector_map.h:    if (byte_number != -1) {
+sector_map.h:    unsigned char new_byte = fill_bit(fs->sector_map[index], bit);
+sector_map.h:    fs->sector_map[index] = new_byte;
+sector.h:    return (char*)(fs->sectors + index * SECTOR_SIZE);
+sector.h:        fs->sectors[sector_index * SECTOR_SIZE + i] = data[i];
+system.h:    fs->sectors = (unsigned char*)malloc(SECTOR_FULL_SIZE);
+system.h:    printf("%d\n", fs->sectors == NULL);
+system.h:    printf("suka: %d, %d\n", fs->sectors, SECTOR_FULL_SIZE);
+system.h:    fs->sector_map = (unsigned char*)malloc(SECTOR_MAP_SIZE);
+system.h:    printf("%d\n", fs->sector_map == NULL);
+system.h:    printf("lalka: %d, %d\n", fs->sector_map, SECTOR_MAP_SIZE);
+system.h:    fs->inode_map = (unsigned char*)malloc(INODE_MAP_SIZE);
+system.h:    fs->inode_system = (unsigned char*)malloc(INODE_FULL_SIZE);
+system.h:    return fs->sector_map;
+system.h:    return fs->sectors;
+system.h:    return fs->inode_map;
+system.h:    return fs->inode_system;
+system.h:    free(fs->sector_map);
+system.h:    free(fs->inode_map);
+system.h:    free(fs->inode_system);
+system.h:    free(fs->sectors);

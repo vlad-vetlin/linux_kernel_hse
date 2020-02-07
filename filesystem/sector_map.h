@@ -4,10 +4,10 @@
 #include "system.h"
 #include <stdlib.h>
 
-// TODO rewrite for work with bits
-
 size_t fill_bit(unsigned char byte, unsigned char bit);
+size_t erase_bit(unsigned char byte, unsigned char bit);
 size_t get_first_zero_bit(unsigned char byte);
+void set_value_on_map(struct Filesystem* fs, size_t sector_number, unsigned char value);
 
 size_t get_number_of_first_empty_sector(struct Filesystem* filesystem) {
     unsigned char* sector_map = get_sector_map(filesystem);
@@ -30,11 +30,25 @@ size_t get_number_of_first_empty_sector(struct Filesystem* filesystem) {
 }
 
 void reserve_sector_on_map(struct Filesystem* fs, size_t sector_number) {
-    
+    set_value_on_map(fs, sector_number, 1);
+}
+
+void remove_sector_on_map(struct Filesystem* fs, size_t sector_number) {
+    set_value_on_map(fs, sector_number, 0);
+}
+
+void set_value_on_map(struct Filesystem* fs, size_t sector_number, unsigned char value) {
     size_t index = sector_number / 8;
     unsigned char bit = sector_number % 8;
 
-    unsigned char new_byte = fill_bit(fs->sector_map[index], bit);
+    unsigned char new_byte;
+
+    if (value == 0) {
+        new_byte = erase_bit(fs->sector_map[index], bit);
+    }
+    else {
+        new_byte = fill_bit(fs->sector_map[index], bit);
+    }
 
     fs->sector_map[index] = new_byte;
 }
@@ -59,4 +73,8 @@ size_t get_first_zero_bit(unsigned char byte) {
 
 size_t fill_bit(unsigned char byte, unsigned char bit) {
     return byte | (1 << bit);
+}
+
+size_t erase_bit(unsigned char byte, unsigned char bit) {
+    return byte & (255 - (1 << bit));
 }
