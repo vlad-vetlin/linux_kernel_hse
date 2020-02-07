@@ -5,20 +5,20 @@
 #include <stdio.h>
 
 struct Filesystem {
-    char* filesystem;
-    char* sector_map;
+    unsigned char* filesystem;
+    unsigned char* sector_map;
 };
 
-char* init_filesystem(struct Filesystem* fs) {
-    fs->filesystem = (char*)malloc(SYSTEM_SIZE);
-    fs->sector_map = (char*)malloc(SECTOR_MAP_SIZE);
+unsigned char* init_filesystem(struct Filesystem* fs) {
+    fs->filesystem = (unsigned char*)malloc(SYSTEM_SIZE);
+    fs->sector_map = (unsigned char*)malloc(SECTOR_MAP_SIZE);
 }
 
-char* get_sector_map(struct Filesystem* fs) {
+unsigned char* get_sector_map(struct Filesystem* fs) {
     return fs->sector_map;
 }
 
-char* get_filesystem(struct Filesystem* fs) {
+unsigned char* get_filesystem(struct Filesystem* fs) {
     return fs->filesystem;
 }
 
