@@ -9,9 +9,9 @@ char* get_pointer_to_sector(struct Filesystem* fs, size_t index);
 void save_sector(size_t sector_index);
 
 size_t make_sector(struct Filesystem* fs) {
-    size_t index = get_number_of_first_empty_sector(fs);
+    size_t index = get_number_of_first_empty(fs->sector_map, SECTOR_COUNT);
 
-    reserve_sector_on_map(fs, index);
+    reserve_on_map(fs->sector_map, index);
 
     return index;    
 }
@@ -36,7 +36,8 @@ void update_sector(struct Filesystem* fs, size_t sector_index, char data[]) {
     save_sector(sector_index);
 }
 
-void remove_sector(struct Filesystem* fs, char* sector) {
+void remove_sector(struct Filesystem* fs, size_t sector_index) {
+    remove_on_map(fs->sector_map, sector_index);
 }
 
 void save_sector(size_t sector_index) {

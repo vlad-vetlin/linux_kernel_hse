@@ -1,18 +1,20 @@
 #pragma once
 
+#include <stdio.h>
+
 // SECTORS
-const int SECTOR_SIZE = 32;
-const int SECTOR_COUNT = 64; // 2KB (1024/32)
-const int SECTOR_FULL_SIZE = 2048;
+const size_t SECTOR_SIZE = 32;
+const size_t SECTOR_COUNT = 64; // 2KB (1024/32)
+const size_t SECTOR_FULL_SIZE = 2048;
 
 // MAPPERS
-const int SECTOR_MAP_SIZE = 4;
-const int INODE_MAP_SIZE = 4;
+const size_t SECTOR_MAP_SIZE = 4;
+const size_t INODE_MAP_SIZE = 4;
 
 // INODES
-const int INODE_SIZE = 32;
-const int INODE_COUNT = 64;
-const int INODE_FULL_SIZE = 2048;
+const size_t INODE_SIZE = 32;
+const size_t INODE_COUNT = 64;
+const size_t INODE_FULL_SIZE = 2048;
 
 
 // SUPER_BLOCK
