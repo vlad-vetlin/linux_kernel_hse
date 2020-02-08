@@ -1,6 +1,7 @@
 #pragma once
 
 #include "configs.h"
+#include "inode.h"
 #include <stdlib.h>
 #include <stdio.h>
 
@@ -8,7 +9,7 @@ struct Filesystem {
     unsigned char* sectors;
     unsigned char* sector_map;
     unsigned char* inode_map;
-    unsigned char* inode_system;
+    struct Inode* inode_system;
 };
 
 void init_filesystem(struct Filesystem* fs) {

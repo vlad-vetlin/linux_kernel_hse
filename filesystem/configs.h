@@ -6,6 +6,7 @@
 const size_t SECTOR_SIZE = 32;
 const size_t SECTOR_COUNT = 64; // 2KB (1024/32)
 const size_t SECTOR_FULL_SIZE = 2048;
+const size_t SECTOR_DATA_SIZE = 28;
 
 // MAPPERS
 const size_t SECTOR_MAP_SIZE = 4;
