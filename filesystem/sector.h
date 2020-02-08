@@ -31,6 +31,8 @@ char* get_pointer_to_sector(struct Filesystem* fs, size_t index) {
     return (char*)(fs->sectors + index * SECTOR_SIZE);
 }
 
+size_t get_index_to_sector_by_pointer(struct Fylesystem* fs, char* pointer) {}
+
 void append_to_sector(struct Filesystem* fs, size_t sector_index, char data[], size_t input_data_size) {
     int i;
 
@@ -57,3 +59,7 @@ void copy_sector(struct Filesystem* fs, size_t to_sector_index, size_t from_sect
 
 void save_sector(size_t sector_index) {
 }
+
+void get_pointer_in_sector_by_index(size_t sector_index, size_t index) {}
+
+void make_sector_indirect(size_t sector_index) {}
