@@ -8,9 +8,9 @@
 struct Sector {
     char data[SECTOR_DATA_SIZE];
     size_t size;
-}
+};
 
-char* get_pointer_to_sector(struct Filesystem* fs, size_t index);
+struct Sector* get_pointer_to_sector(struct Filesystem* fs, size_t index);
 void save_sector(size_t sector_index);
 
 size_t make_sector(struct Filesystem* fs) {
@@ -27,11 +27,13 @@ void print_sector(struct Filesystem* fs, size_t sector) {
     printf("%s", sector_pointer);
 }
 
-char* get_pointer_to_sector(struct Filesystem* fs, size_t index) {
+struct Sector* get_pointer_to_sector(struct Filesystem* fs, size_t index) {
     return (char*)(fs->sectors + index * SECTOR_SIZE);
 }
 
-size_t get_index_to_sector_by_pointer(struct Fylesystem* fs, char* pointer) {}
+size_t get_index_to_sector_by_pointer(struct Fylesystem* fs, char* pointer) {
+    return (size_t) ((pointer - fs->sectors) / SECTOR_SIZE);
+}
 
 void append_to_sector(struct Filesystem* fs, size_t sector_index, char data[], size_t input_data_size) {
     int i;
@@ -60,6 +62,21 @@ void copy_sector(struct Filesystem* fs, size_t to_sector_index, size_t from_sect
 void save_sector(size_t sector_index) {
 }
 
-void get_pointer_in_sector_by_index(size_t sector_index, size_t index) {}
+struct Sector* get_pointer_in_sector_by_index(struct Filesystem* fs, size_t sector_index, size_t index) {
+    struct Sector* sector_pointer = get_pointer_to_sector(fs, sector_index);
 
-void make_sector_indirect(size_t sector_index) {}
+    return ((struct Sector**)(sector_pointer->data))[index];
+
+    
+}
+
+void make_sector_indirect(struct Filesystem* fs, size_t sector_index) {
+    int i;
+
+    for (i = 0; i < SECTOR_DATA_SIZE; ++i) {
+        size_t new_sector_index = make_sector(fs);
+        Sector* sector_pointer
+
+        append_to_sector(fs, sector_index, )
+    }
+}
