@@ -1,7 +1,8 @@
-#pragma once
+#ifndef FILESYSTEM_MAPPER_H
+#define FILESYSTEM_MAPPER_H
 
+#include "classes.h"
 #include "configs.h"
-#include "system.h"
 #include <stdlib.h>
 
 size_t fill_bit(unsigned char byte, unsigned char bit);
@@ -83,3 +84,5 @@ size_t fill_bit(unsigned char byte, unsigned char bit) {
 size_t erase_bit(unsigned char byte, unsigned char bit) {
     return byte & (255 - (1 << bit));
 }
+
+#endif //FILESYSTEM_MAPPER_H

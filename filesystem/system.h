@@ -1,16 +1,11 @@
-#pragma once
+#ifndef FILESYSTEM_SYSTEM_H
+#define FILESYSTEM_SYSTEM_H
 
+#include "classes.h"
 #include "configs.h"
-#include "inode.h"
+
 #include <stdlib.h>
 #include <stdio.h>
-
-struct Filesystem {
-    struct Sector* sectors;
-    unsigned char* sector_map;
-    unsigned char* inode_map;
-    struct Inode* inode_system;
-};
 
 void init_filesystem(struct Filesystem* fs) {
     fs->sector_map = (unsigned char*)malloc(SECTOR_MAP_SIZE);
@@ -24,15 +19,15 @@ unsigned char* get_sector_map(struct Filesystem* fs) {
     return fs->sector_map;
 }
 
-struct Sectors* get_sectors(struct Filesystem* fs) {
-    return fs- >sectors;
+struct Sector* get_sectors(struct Filesystem* fs) {
+    return fs->sectors;
 }
 
 unsigned char* get_inode_map(struct Filesystem* fs) {
     return fs->inode_map;
 }
 
-unsigned char* get_inode_system(struct Filesystem* fs) {
+struct Inode* get_inode_system(struct Filesystem* fs) {
     return fs->inode_system;
 }
 
@@ -42,3 +37,5 @@ void free_filesystem(struct Filesystem* fs) {
     free(fs->inode_system);
     free(fs->sectors);
 }
+
+#endif //FILESYSTEM_SYSTEM_H

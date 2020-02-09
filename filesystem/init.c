@@ -1,29 +1,29 @@
-#include "system.h"
-#include "sector_map.h"
-#include <stdio.h>
+#include "classes.h"
+#include "configs.h"
+#include "inode.h"
 #include "sector.h"
+#include "sector_map.h"
+#include "system.h"
 
 int main() {
     struct Filesystem *fs = malloc(sizeof(fs));
 
     init_filesystem(fs);
 
-    size_t sector = make_sector(fs);
+    size_t inode_index = create_inode_with_name(fs, NULL, 0, "test");
 
-    update_sector(fs, sector, "test\ntest\n\0");
-    
-    print_sector(fs, sector);
+    int i;
+    for (i = 0; i < 10; ++i) {
+        inode_index = append_data_to_inode(fs, inode_index, "tttttttttttt", 12);
+        printf("\n");
+        print_metadata(fs, inode_index);
 
-    update_sector(fs, sector, "kek\n\0");
+        printf("\n");
+        print_inode(fs, inode_index);
+        printf("\n");
+    }
 
-    print_sector(fs, sector);
 
-    size_t sector_2 = make_sector(fs);
-
-    update_sector(fs, sector_2, "zu\n\0");
-
-    print_sector(fs, sector);
-    print_sector(fs, sector_2);
 
     free_filesystem(fs);
     free(fs);
