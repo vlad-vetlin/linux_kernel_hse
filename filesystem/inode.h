@@ -5,7 +5,13 @@
 #include "sector_map.h"
 #include "system.h"
 
-// size 8 + 1 + 8 = 19
+// parent_inode_index - 4
+// is_file - 1
+// size - 4
+// name - 8
+// sector_pointer - 8
+//
+// full_size = 25
 struct Inode {
     size_t parent_inode_index;
     bool is_file;
@@ -23,12 +29,15 @@ void clear_inode(struct Filesystem* fs, size_t inode_index);
 // without checking parent node. Only set value
 size_t create_inode(struct Filesystem* fs, size_t parent_inode_index, bool is_file);
 
+// get sector on the last layer by indirect level
 size_t get_sector_count_by_indirect_level(size_t indirect_level);
 
+// calculate memory size of the last layer by indirect level
 size_t calc_size_with_indirect_level(size_t indirect_level) {
     return get_sector_count_by_indirect_level(indirect_level) * SECTOR_DATA_SIZE;
 }
 
+// calculate pow
 size_t pow(size_t value, size_t p) {
     if (p == 0) {
         return 1;
@@ -41,42 +50,53 @@ size_t pow(size_t value, size_t p) {
     }
 }
 
+// calculate indirect level for indobe by of it size
 size_t needed_inode_indirect_level(size_t size) {
-    int i = 1;
+    int i = 0;
 
     size_t cur_size = calc_size_with_indirect_level(i);
     while (cur_size < size) {
         ++i;
-        size_t cur_size = calc_size_with_indirect_level(i);
+        cur_size = calc_size_with_indirect_level(i);
     }
 
     return i;
 }
 
+// return count of sectors on last layer by indirect level
 size_t get_sector_count_by_indirect_level(size_t indirect_level) {
-    return pow(SECTOR_INDIRECT_COUNT, indirect_level + 1);
+    return pow(SECTOR_INDIRECT_COUNT, indirect_level);
 }
 
-size_t get_pointer_in_cur_indiect_level(size_t indirect_level, size_t full_indirect_level, size_t dest_index) {}
+// get pointer to sector in current indirect level
+size_t get_pointer_in_cur_indirect_level(size_t indirect_level, size_t full_indirect_level, size_t dest_index) {
+    size_t step_size = get_sector_count_by_indirect_level(full_indirect_level - indirect_level - 1);
 
+    return dest_index / step_size;
+}
+
+// get global sector index by it index in inode
 size_t get_sector_index_in_inode(struct Filesystem* fs, size_t inode_index, size_t sector_index_in_inode) {
     size_t inode_size = fs->inode_system[inode_index].size;
     size_t indirect_level = needed_inode_indirect_level(inode_size);
     int i;
 
-    Sector* sector_pointer = fs->inode_system[inode_index].sector_pointer;
+    struct Sector* sector_pointer = fs->inode_system[inode_index].sector_pointer;
     size_t sector_index = get_index_to_sector_by_pointer(fs, sector_pointer);
 
     for (i = 1; i < indirect_level; ++i) {
         size_t index = get_pointer_in_cur_indirect_level(i, indirect_level, sector_index_in_inode);
 
-        sector_pointer = get_pointer_in_sector_by_index(sector_index, index);
+        sector_index_in_inode -= get_sector_count_by_indirect_level(indirect_level - i - 1) * index;
+
+        sector_pointer = get_pointer_in_sector_by_index(fs, sector_index, index);
         sector_index = get_index_to_sector_by_pointer(fs, sector_pointer);
     }
 
     return sector_index;
 }
 
+// copy one inode to another
 void copy_inode(struct Filesystem* fs, size_t to_inode_index, size_t from_inode_index) {
     int i;
 
@@ -92,20 +112,35 @@ void copy_inode(struct Filesystem* fs, size_t to_inode_index, size_t from_inode_
     }
 }
 
+// delete inode and all sectors
 void delete_inode(struct Filesystem* fs, size_t inode_index) {
     clear_inode(fs, inode_index);
 
     remove_on_map(fs->inode_map, inode_index);
 }
 
+size_t get_real_sector_count_by_indirect_level(size_t indirect_level) {
+    size_t sum = 0;
+    int i;
+
+    for (i = 0; i <= indirect_level; ++i) {
+        sum += get_sector_count_by_indirect_level(i);
+    }
+
+    return sum;
+}
+
+// get real size of inode
 size_t get_inode_real_size(struct Filesystem* fs, size_t inode_index) {
     size_t inode_size = fs->inode_system[inode_index].size;
 
     size_t indirect_level = needed_inode_indirect_level(inode_size);
 
-    return get_sector_count_by_indirect_level(indirect_level) * SECTOR_SIZE;
+    return get_real_sector_count_by_indirect_level(indirect_level) * SECTOR_SIZE;
 }
 
+// get count of not empty sectors in last layer of inode
+// with half empty sector
 size_t get_filled_sectors(struct Filesystem* fs, size_t inode_index) {
     size_t inode_size = fs->inode_system[inode_index].size;
 
@@ -117,6 +152,7 @@ size_t get_filled_sectors(struct Filesystem* fs, size_t inode_index) {
     return result;
 }
 
+// create new inode with indirect level. IMPORTANT needed indirect level after this will work bad
 size_t create_inode_with_indirect_level(struct Filesystem* fs, size_t parent_inode_index, bool is_file, size_t indirect_level) {
     size_t inode_index = create_inode(fs, parent_inode_index, is_file);
     int i;
@@ -128,17 +164,20 @@ size_t create_inode_with_indirect_level(struct Filesystem* fs, size_t parent_ino
         for (j = 0; j < sector_count; ++j) {
             size_t sector_index = get_sector_index_in_inode(fs, inode_index, j);
 
-            make_sector_indirect(sector_index);
+            make_sector_indirect(fs, sector_index);
         }
     }
 
     return inode_index;
 }
 
+// add indirect level to inode
 size_t add_indirect_level_to_inode(struct Filesystem* fs, size_t inode_index) {
     size_t cur_indirect_level = needed_indode_indirect_level(fs, inode_index);
 
-    size_t new_inode_index = create_inode_with_indirect_level(cur_indirect_level + 1);
+    struct Inode* inode = fs->inode_system[inode_index];
+
+    size_t new_inode_index = create_inode_with_indirect_level(fs, inode->parent_inode_index, inode->is_file, cur_indirect_level + 1);
 
     copy_inode(fs, new_inode_index, inode_index);
     delete_inode(fs, inode_index);
@@ -146,12 +185,15 @@ size_t add_indirect_level_to_inode(struct Filesystem* fs, size_t inode_index) {
     return new_inode_index;
 }
 
-void decrease_indirect_level_from_inode(struct Filesystem* fs, size_t inode_index) {
+// decrement indirect level
+void decrement_indirect_level_in_inode(struct Filesystem* fs, size_t inode_index) {
     size_t size = fs->inode_system[inode_index].size;
     size_t indirect_level = needed_inode_indirect_level(size);
-    fs->inode_system[inode_index].size = caclc_size_with_indirect_level(indirect_level);
+
+    fs->inode_system[inode_index].size = caclc_size_with_indirect_level(indirect_level - 1);
 }
 
+//
 void remove_all_sectors_in_inode(struct Filesystem* fs, size_t inode_index) {
     size_t inode_size = fs->inode_system[inode_index].size;
     size_t indirect_level = needed_inode_indirect_level(inode_size);
@@ -161,18 +203,19 @@ void remove_all_sectors_in_inode(struct Filesystem* fs, size_t inode_index) {
         size_t sector_count = get_sector_count_by_indirect_level(indirect_level);
 
         for (i = 0; i < sector_count; ++i) {
-            size_t sector_index = get_sector_index_in_inode(fs, i);
+            size_t sector_index = get_sector_index_in_inode(fs, inode_index, i);
 
             remove_sector(fs, sector_index);
         }
 
-        decrease_indirect_level_from_inode(fs, inode_index);
+        decrement_indirect_level_in_inode(fs, inode_index);
         inode_size = fs->inode_system[inode_index].size;
-        indirect_level = needed-inode_indirect_level(inode_size);
+        indirect_level = needed_inode_indirect_level(inode_size);
     }
 }
 
-size_t create_indode(struct Filesystem* fs, size_t parent_inode_index, bool is_file) {
+// create new inode
+size_t create_inode(struct Filesystem* fs, size_t parent_inode_index, bool is_file) {
     size_t inode_index = get_number_of_first_empty(fs->inode_map, INODE_CONT);
 
     reserve_on_map(fs->inode_map, inode_index);
@@ -189,6 +232,7 @@ size_t create_indode(struct Filesystem* fs, size_t parent_inode_index, bool is_f
     return inode_index;
 }
 
+// append data to the end of inode
 void append_data_to_inode(struct Filesystem* fs, size_t inode_index, char* data, size_t input_data_size) {
     size_t inode_size = fs->inode_system[inode_index].size;
     size_t new_size = inode_size + input_data_size;
@@ -197,11 +241,9 @@ void append_data_to_inode(struct Filesystem* fs, size_t inode_index, char* data,
         add_indirect_level_to_inode(inode_index);
     }
 
-    size_t cur_sector_index_in_inode = get_filed_sectors_in_inode(fs->inode_system[inode_index]);
+    size_t cur_sector_index_in_inode = get_filled_sectors(fs, inode_index);
 
     while (input_data_size > 0) {
-        ++cur_sector_index_in_inode;
-
         size_t sector_index = get_sector_index_in_inode(fs, cur_sector_index_in_inode);
 
         append_to_sector(fs, sector_index, data, input_data_size);
@@ -210,29 +252,33 @@ void append_data_to_inode(struct Filesystem* fs, size_t inode_index, char* data,
         if (input_data_size > 0) {
             data += SECTOR_DATA_SIZE;
         }
+
+        ++cur_sector_index_in_inode;
     }
 
     fs->inode_system[inode_index].size = new_size;
 }
 
+// clear all data in inode
 void clear_inode(struct Filesystem* fs, size_t inode_index) {
     remove_all_sectors_in_inode(fs, inode_index);
     
     fs->inode_system[inode_index].size = 0;
-    fs->inode_system[inode_index].filled_sectors = 0;
 }
 
+//  print inode data
 void print_inode(struct Filesystem* fs, size_t inode_index) {
     int i;
-    size_t filled_sectors = get_filled_sectors_in_inode(fs->inode_system[inode_index]);
+    size_t filled_sectors = get_filled_sectors(fs, inode_index);
 
     for (i = 0; i < filled_sectors; ++i) {
-        size_t sector_index = get_sector_index_in_inode(fs, i);
+        size_t sector_index = get_sector_index_in_inode(fs, inode_index, i);
 
         print_sector(fs, sector_index);
     }
 }
 
+// print all metadata in inode
 void print_metadata(struct Filesystem* fs, size_t inode_index) {
     struct Inode* inode = (fs->inode_system + inode_index);
 
