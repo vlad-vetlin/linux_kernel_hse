@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include "system.h"
 #include "sector_map.h"
+#include <stdlib.h>
 
 struct Sector {
     char data[SECTOR_DATA_SIZE];
@@ -66,8 +67,6 @@ struct Sector* get_pointer_in_sector_by_index(struct Filesystem* fs, size_t sect
     struct Sector* sector_pointer = get_pointer_to_sector(fs, sector_index);
 
     return ((struct Sector**)(sector_pointer->data))[index];
-
-    
 }
 
 void make_sector_indirect(struct Filesystem* fs, size_t sector_index) {
@@ -75,8 +74,10 @@ void make_sector_indirect(struct Filesystem* fs, size_t sector_index) {
 
     for (i = 0; i < SECTOR_DATA_SIZE; ++i) {
         size_t new_sector_index = make_sector(fs);
-        Sector* sector_pointer
+        Sector* sector_pointer = get_pointer_to_sector(fs, new_sector_index);
 
-        append_to_sector(fs, sector_index, )
+        char str_pointer[];
+        ltoa(sector_pointer, str_pointer);
+        append_to_sector(fs, sector_index, str_pointer);
     }
 }

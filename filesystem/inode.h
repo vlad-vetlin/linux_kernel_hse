@@ -16,8 +16,11 @@ struct Inode {
     Sector* sector_pointer;
 };
 
+// remove inode from mapped and delete all sectors
 void clear_inode(struct Filesystem* fs, size_t inode_index);
 
+// create new inode with parent_inode and file.
+// without checking parent node. Only set value
 size_t create_inode(struct Filesystem* fs, size_t parent_inode_index, bool is_file);
 
 size_t get_sector_count_by_indirect_level(size_t indirect_level);

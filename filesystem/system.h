@@ -6,7 +6,7 @@
 #include <stdio.h>
 
 struct Filesystem {
-    unsigned char* sectors;
+    struct Sector* sectors;
     unsigned char* sector_map;
     unsigned char* inode_map;
     struct Inode* inode_system;
@@ -16,16 +16,16 @@ void init_filesystem(struct Filesystem* fs) {
     fs->sector_map = (unsigned char*)malloc(SECTOR_MAP_SIZE);
     fs->sector_map = (unsigned char*)malloc(SECTOR_MAP_SIZE);
     fs->inode_map = (unsigned char*)malloc(INODE_MAP_SIZE);
-    fs->inode_system = (unsigned char*)malloc(INODE_FULL_SIZE);
-    fs->sectors = (unsigned char*)malloc(SECTOR_FULL_SIZE);
+    fs->inode_system = (struct Inode*)malloc(INODE_FULL_SIZE);
+    fs->sectors = (struct Sector*)malloc(SECTOR_FULL_SIZE);
 }
 
 unsigned char* get_sector_map(struct Filesystem* fs) {
     return fs->sector_map;
 }
 
-unsigned char* get_sectors(struct Filesystem* fs) {
-    return fs->sectors;
+struct Sectors* get_sectors(struct Filesystem* fs) {
+    return fs- >sectors;
 }
 
 unsigned char* get_inode_map(struct Filesystem* fs) {
