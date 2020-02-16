@@ -11,6 +11,7 @@
 #include "command_utils.h"
 #include "echo.h"
 #include "cat.h"
+#include "rm.h"
 
 void command_parse(struct Filesystem* fs, struct Session* sess) {
     char command_name[10];
@@ -50,6 +51,10 @@ void command_parse(struct Filesystem* fs, struct Session* sess) {
         char* filename = get_string();
 
         cat(fs, sess, filename);
+    } else if (strcmp(command_name, "rm") == 0) {
+        char* filename = get_string();
+
+        remove_command(fs, sess, filename);
     }
 }
 

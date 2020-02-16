@@ -172,7 +172,7 @@ size_t create_inode_with_indirect_level(struct Filesystem* fs, struct Inode* par
     return inode_index;
 }
 
-void remove_pointer_from_inode(struct Filesystem* fs, struct Inode* inode, void* pointer) {
+short remove_pointer_from_inode(struct Filesystem* fs, struct Inode* inode, void* pointer) {
     int i;
     size_t indirect_level = needed_inode_indirect_level(inode->size);
     size_t sector_count = get_sector_count_by_indirect_level(indirect_level);
@@ -183,9 +183,11 @@ void remove_pointer_from_inode(struct Filesystem* fs, struct Inode* inode, void*
         struct Sector* sector_pointer = get_pointer_to_sector(fs, sector_index);
 
         if (remove_pointer_from_sector(fs, sector_pointer, pointer)) {
-            return;
+            return 1;
         }
     }
+
+    return 0;
 }
 
 
