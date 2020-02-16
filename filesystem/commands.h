@@ -55,6 +55,8 @@ void command_parse(struct Filesystem* fs, struct Session* sess) {
         char* filename = get_string();
 
         remove_command(fs, sess, filename);
+    } else if (strcmp(command_name, "save") == 0) {
+        save_filesystem(fs);
     }
 }
 

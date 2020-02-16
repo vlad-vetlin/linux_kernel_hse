@@ -1,7 +1,3 @@
-//
-// Created by green-tea on 09.02.20.
-//
-
 #ifndef FILESYSTEM_LS_H
 #define FILESYSTEM_LS_H
 
@@ -28,9 +24,7 @@ void ls(struct Filesystem* fs, struct Session* sess) {
             struct Sector* cur_sector_pointer = get_pointer_to_sector(fs, sector_index);
 
             for (j = 0; j < cur_sector_pointer->size; j += 16) {
-                struct Inode* inode_pointer = (struct Inode*)get_pointer_in_sector_by_index(fs, sector_index, j / 16);
-
-                size_t cur_inode_index = get_inode_index(fs, inode_pointer);
+                size_t cur_inode_index = get_pointer_in_sector_by_index(fs, sector_index, j / 16);
 
                 print_metadata(fs, cur_inode_index);
             }

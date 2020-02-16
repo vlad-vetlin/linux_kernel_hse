@@ -1,13 +1,13 @@
 #ifndef FILESYSTEM_SECTOR_H
 #define FILESYSTEM_SECTOR_H
 
-#include "classes.h"
-#include "configs.h"
-#include "sector_map.h"
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#include "classes.h"
+#include "configs.h"
+#include "sector_map.h"
 
 // return pointer to sector data by sector index
 struct Sector* get_pointer_to_sector(struct Filesystem* fs, size_t index);
@@ -119,11 +119,11 @@ long long my_atol(char* data, int len){
 }
 
 // get pointer to sector in indirect sector by index
-void* get_pointer_in_sector_by_index(struct Filesystem* fs, size_t sector_index, size_t index) {
+size_t get_pointer_in_sector_by_index(struct Filesystem* fs, size_t sector_index, size_t index) {
     struct Sector* sector_pointer = get_pointer_to_sector(fs, sector_index);
 
     int i;
-    char s_index[17];
+    char s_index[16];
 
     if (index > SECTOR_DATA_SIZE / 16 - 1) {
         exit(1);
@@ -133,19 +133,19 @@ void* get_pointer_in_sector_by_index(struct Filesystem* fs, size_t sector_index,
         s_index[i] = sector_pointer->data[16 * index + i];
     }
 
-    s_index[16] = '\0';
+//    s_index[16] = '\0';
 
-    return (void*) my_atol(s_index, 16);
+    return (size_t) my_atol(s_index, 16);
 }
 
-short remove_pointer_from_sector(struct Filesystem* fs, struct Sector* sector, void* pointer) {
+short remove_pointer_from_sector(struct Filesystem* fs, struct Sector* sector, size_t index) {
     size_t sector_index = get_index_to_sector_by_pointer(fs, sector);
 
     int i;
     for (i = 0; i < sector->size; i += 16) {
-        void* new_pointer = (struct Inode*)get_pointer_in_sector_by_index(fs, sector_index, i / 16);
+        size_t new_index = get_pointer_in_sector_by_index(fs, sector_index, i / 16);
 
-        if (new_pointer == pointer) {
+        if (new_index == index) {
             int last_pointer_first_index = sector->size - 16;
             int j = last_pointer_first_index;
 
@@ -180,9 +180,8 @@ void make_sector_indirect(struct Filesystem* fs, size_t sector_index) {
 
     for (i = 0; i < SECTOR_INDIRECT_COUNT; ++i) {
         size_t new_sector_index = make_sector(fs);
-        struct Sector* sector_pointer = get_pointer_to_sector(fs, new_sector_index);
 
-        char* str_pointer = ltoa((long long)sector_pointer, 16);
+        char* str_pointer = ltoa(new_sector_index, 16);
 
         append_to_sector(fs, sector_index, str_pointer, 16);
     }

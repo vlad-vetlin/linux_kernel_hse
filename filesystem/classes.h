@@ -35,6 +35,8 @@ struct Filesystem {
     unsigned char* sector_map;
     unsigned char* inode_map;
     struct Inode* inode_system;
+    void* fin;
+    void* fout;
 };
 
 struct Session {

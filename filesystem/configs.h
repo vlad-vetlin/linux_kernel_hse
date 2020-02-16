@@ -11,8 +11,8 @@ const size_t SECTOR_FULL_SIZE = 4352;
 const size_t SECTOR_INDIRECT_COUNT = 4;
 
 // MAPPERS
-const size_t SECTOR_MAP_SIZE = 4;
-const size_t INODE_MAP_SIZE = 4;
+const size_t SECTOR_MAP_SIZE = 8;
+const size_t INODE_MAP_SIZE = 8;
 
 // INODES
 const size_t INODE_SIZE = 29;

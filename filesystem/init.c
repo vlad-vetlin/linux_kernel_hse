@@ -1,3 +1,5 @@
+#include "system.h"
+
 #include "classes.h"
 #include "configs.h"
 #include "inode.h"
@@ -11,17 +13,7 @@ int main() {
     struct Filesystem fs;
     struct Session sess;
 
-
     init_filesystem(&fs);
-
-    size_t root_inode = create_inode_with_name(&fs, NULL, 0, "test");
-//    printf("\n***\n");
-//    create_inode_with_name(fs, get_inode_pointer(fs, root_inode), 0, "kek");
-//    printf("\n***\n");
-//    create_inode_with_name(fs, get_inode_pointer(fs, root_inode), 0, "lol");
-//    printf("\n***\n");
-//    create_inode_with_name(fs, get_inode_pointer(fs, root_inode), 0, "zu");
-//    printf("\n***\n");
 
     set_root_file_as_cur(&fs, &sess);
 

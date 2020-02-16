@@ -7,6 +7,11 @@
 void cat(struct Filesystem* fs, struct Session* sess, char* filename) {
     struct Inode* inode = find_inode_by_name(fs, sess->cur_file, filename);
 
+    if (inode == NULL) {
+        printf("this file does not exist\n");
+        return;
+    }
+
     printf("metadata: \n");
 
     size_t inode_index = get_inode_index(fs, inode);

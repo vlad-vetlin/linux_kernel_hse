@@ -79,8 +79,7 @@ size_t get_sector_index_in_inode_by_indirect_level(struct Filesystem* fs, size_t
 
         sector_index_in_inode -= step_size * index;
 
-        sector_pointer = (struct Sector*)get_pointer_in_sector_by_index(fs, sector_index, index);
-        sector_index = get_index_to_sector_by_pointer(fs, sector_pointer);
+        sector_index = get_pointer_in_sector_by_index(fs, sector_index, index);
     }
 
     return sector_index;
@@ -91,7 +90,7 @@ size_t get_sector_index_in_inode(struct Filesystem* fs, size_t inode_index, size
     size_t inode_size = fs->inode_system[inode_index].size;
     size_t indirect_level = needed_inode_indirect_level(inode_size);
 
-    get_sector_index_in_inode_by_indirect_level(fs, inode_index, indirect_level, sector_index_in_inode);
+    return get_sector_index_in_inode_by_indirect_level(fs, inode_index, indirect_level, sector_index_in_inode);
 }
 
 // copy one inode to another
@@ -172,7 +171,7 @@ size_t create_inode_with_indirect_level(struct Filesystem* fs, struct Inode* par
     return inode_index;
 }
 
-short remove_pointer_from_inode(struct Filesystem* fs, struct Inode* inode, void* pointer) {
+short remove_pointer_from_inode(struct Filesystem* fs, struct Inode* inode, size_t index) {
     int i;
     size_t indirect_level = needed_inode_indirect_level(inode->size);
     size_t sector_count = get_sector_count_by_indirect_level(indirect_level);
@@ -182,7 +181,7 @@ short remove_pointer_from_inode(struct Filesystem* fs, struct Inode* inode, void
 
         struct Sector* sector_pointer = get_pointer_to_sector(fs, sector_index);
 
-        if (remove_pointer_from_sector(fs, sector_pointer, pointer)) {
+        if (remove_pointer_from_sector(fs, sector_pointer, index)) {
             return 1;
         }
     }
@@ -204,9 +203,9 @@ size_t add_indirect_level_to_inode(struct Filesystem* fs, size_t inode_index) {
 
     struct Inode* inode_pointer = get_inode_pointer(fs, inode_index);
     if (inode_pointer->parent_inode != NULL) {
-        remove_pointer_from_inode(fs, inode_pointer->parent_inode, inode_pointer);
+        remove_pointer_from_inode(fs, inode_pointer->parent_inode, inode_index);
 
-        char* str_pointer = ltoa((long long)get_inode_pointer(fs, new_inode_index), 16);
+        char* str_pointer = ltoa(new_inode_index, 16);
         size_t test = append_data_to_inode(fs, get_inode_index(fs, inode_pointer->parent_inode), str_pointer, 16);
     }
 

@@ -16,7 +16,7 @@ void remove_command(struct Filesystem* fs, struct Session* sess, char* filename)
         printf("yuo cant delete root directory\n");
     }
 
-    short result = remove_pointer_from_inode(fs, inode->parent_inode, inode);
+    short result = remove_pointer_from_inode(fs, inode->parent_inode, get_inode_index(fs, inode));
 
     printf("lalka: %d\n", result);
 

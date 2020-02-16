@@ -1,32 +1,27 @@
 #ifndef FILESYSTEM_MAPPER_H
 #define FILESYSTEM_MAPPER_H
 
+#include <stdlib.h>
+
 #include "classes.h"
 #include "configs.h"
-#include <stdlib.h>
 
 size_t fill_bit(unsigned char byte, unsigned char bit);
 size_t erase_bit(unsigned char byte, unsigned char bit);
 size_t get_first_zero_bit(unsigned char byte);
 void set_value_on_map(unsigned char* map, size_t sector_number, unsigned char value);
+short check_bit_by_index(unsigned char* map, size_t index);
 
 size_t get_number_of_first_empty(unsigned char* map, size_t map_size) {
     int i;
-    size_t byte_number = -1;
 
-    for (i = 0; i < map_size; ++i) {
-        if (map[i] != 255) {
-            byte_number = i;
-            break;
+    for (i = 0; i < map_size * 8; ++i) {
+        if (check_bit_by_index(map, i) == 0) {
+            return i;
         }
     }
 
-    if (byte_number != -1) {
-        return byte_number * 8 + get_first_zero_bit(map[byte_number]);
-    }
-    else {
-        exit(27);
-    }
+    exit(27);
 }
 
 void reserve_on_map(unsigned char* map, size_t element_number) {

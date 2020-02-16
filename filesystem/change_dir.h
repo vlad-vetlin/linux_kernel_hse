@@ -1,7 +1,3 @@
-//
-// Created by green-tea on 09.02.20.
-//
-
 #ifndef FILESYSTEM_CHANGE_DIR_H
 #define FILESYSTEM_CHANGE_DIR_H
 

@@ -18,7 +18,7 @@ void make(struct Filesystem* fs, struct Session* sess, char* filename, short is_
 
     size_t inode_index = create_inode_with_name(fs, sess->cur_file, is_file, filename);
 
-    char* str_pointer = ltoa((long long)get_inode_pointer(fs, inode_index), 16);
+    char* str_pointer = ltoa(inode_index, 16);
     size_t cur_inode_index = get_inode_index(fs, sess->cur_file);
 
     size_t test = append_data_to_inode(fs, cur_inode_index, str_pointer, 16);
