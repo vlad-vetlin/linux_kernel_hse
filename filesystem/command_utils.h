@@ -30,4 +30,22 @@ struct Inode* find_inode_by_name(struct Filesystem* fs, struct Inode* inode, cha
     }
 }
 
+char* get_string() {
+    char data[100];
+
+    scanf("%s", data);
+
+    size_t len = strlen(data) + 1;
+    char* data_in_memory = malloc(len);
+
+    int i;
+    for (i = 0; i < len - 1; ++i) {
+        data_in_memory[i] = data[i];
+    }
+
+    data_in_memory[len - 1] = '\0';
+
+    return data_in_memory;
+}
+
 #endif //FILESYSTEM_COMMAND_UTILS_H
