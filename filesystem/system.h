@@ -3,6 +3,7 @@
 
 #include "classes.h"
 #include "configs.h"
+#include "sector_map.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -32,10 +33,26 @@ struct Inode* get_inode_system(struct Filesystem* fs) {
 }
 
 void free_filesystem(struct Filesystem* fs) {
+    int i;
+    for (i = 0; i < INODE_MAP_SIZE; ++i) {
+        if (check_bit_by_index(fs->inode_map, i)) {
+            free(fs->inode_system[i].name);
+        }
+    }
+
     free(fs->sector_map);
     free(fs->inode_map);
     free(fs->inode_system);
     free(fs->sectors);
+}
+
+size_t find_index_of_root_inode(struct Filesystem* fs) {
+    int i;
+    for (i = 0; i < INODE_COUNT; ++i) {
+        if (check_bit_by_index(fs->inode_map, i) && inode_is_root(fs, i)) {
+            return i;
+        }
+    }
 }
 
 #endif //FILESYSTEM_SYSTEM_H

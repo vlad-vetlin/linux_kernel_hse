@@ -37,4 +37,8 @@ struct Filesystem {
     struct Inode* inode_system;
 };
 
+struct Session {
+    struct Inode* cur_file;
+};
+
 #endif //FILESYSTEM_CLASSES_H

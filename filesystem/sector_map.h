@@ -85,4 +85,12 @@ size_t erase_bit(unsigned char byte, unsigned char bit) {
     return byte & (255 - (1 << bit));
 }
 
+short check_bit(unsigned char byte, unsigned char bit) {
+    return (byte & (1 << bit)) > 0;
+}
+
+short check_bit_by_index(unsigned char* map, size_t index) {
+    return check_bit(map[index / 8], index % 8);
+}
+
 #endif //FILESYSTEM_MAPPER_H

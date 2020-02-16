@@ -119,7 +119,7 @@ long long my_atol(char* data, int len){
 }
 
 // get pointer to sector in indirect sector by index
-struct Sector* get_pointer_in_sector_by_index(struct Filesystem* fs, size_t sector_index, size_t index) {
+void* get_pointer_in_sector_by_index(struct Filesystem* fs, size_t sector_index, size_t index) {
     struct Sector* sector_pointer = get_pointer_to_sector(fs, sector_index);
 
     int i;
@@ -134,7 +134,7 @@ struct Sector* get_pointer_in_sector_by_index(struct Filesystem* fs, size_t sect
 
     s_index[16] = '\0';
 
-    return my_atol(s_index, 16);
+    return (void*) my_atol(s_index, 16);
 }
 
 char* ltoa(long long val, int len){

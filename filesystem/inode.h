@@ -13,6 +13,8 @@ void clear_inode(struct Filesystem* fs, size_t inode_index);
 // without checking parent node. Only set value
 size_t create_inode(struct Filesystem* fs, struct Inode* parent_inode, short is_file);
 
+void print_metadata(struct Filesystem* fs, size_t inode_index);
+
 // get sector on the last layer by indirect level
 size_t get_sector_count_by_indirect_level(size_t indirect_level);
 
@@ -72,7 +74,7 @@ size_t get_sector_index_in_inode_by_indirect_level(struct Filesystem* fs, size_t
 
         sector_index_in_inode -= step_size * index;
 
-        sector_pointer = get_pointer_in_sector_by_index(fs, sector_index, index);
+        sector_pointer = (struct Sector*)get_pointer_in_sector_by_index(fs, sector_index, index);
         sector_index = get_index_to_sector_by_pointer(fs, sector_pointer);
     }
 
@@ -280,15 +282,19 @@ void print_inode(struct Filesystem* fs, size_t inode_index) {
     }
 }
 
+struct Inode* get_inode_pointer(struct Filesystem* fs, size_t inode_index) {
+    return &(fs->inode_system[inode_index]);
+}
+
 // print all metadata in inode
 void print_metadata(struct Filesystem* fs, size_t inode_index) {
-    struct Inode* inode = (fs->inode_system + inode_index);
+    struct Inode* inode = get_inode_pointer(fs, inode_index);
 
     printf("is_file: %d, name: %s, size: %ld, real_size: %ld\n", inode->is_file, inode->name, inode->size, get_inode_real_size(fs, inode_index));
 }
 
-struct Inode* get_inode_pointer(struct Filesystem* fs, size_t inode_index) {
-    return &(fs->inode_system[inode_index]);
+size_t get_inode_index(struct Filesystem* fs, struct Inode* inode_pointer) {
+    return (size_t) ((inode_pointer - fs->inode_system));
 }
 
 void set_inode_name(struct Filesystem* fs, size_t inode_index, char* data) {
@@ -301,6 +307,10 @@ size_t create_inode_with_name(struct Filesystem* fs, struct Inode* parent_inode,
     set_inode_name(fs, inode_index, name);
 
     return inode_index;
+}
+
+short inode_is_root(struct Filesystem* fs, size_t index) {
+    return fs->inode_system[index].parent_inode == NULL;
 }
 
 
