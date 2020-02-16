@@ -25,9 +25,9 @@ struct Inode* find_inode_by_name(struct Filesystem* fs, struct Inode* inode, cha
                 return inode_pointer;
             }
         }
-
-        return NULL;
     }
+
+    return NULL;
 }
 
 char* get_string() {

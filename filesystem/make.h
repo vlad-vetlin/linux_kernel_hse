@@ -5,13 +5,14 @@
 #include "inode.h"
 #include "sector.h"
 #include "command_utils.h"
+#include "ls.h"
 
 void make(struct Filesystem* fs, struct Session* sess, char* filename, short is_file) {
 
     struct Inode* inode = find_inode_by_name(fs, sess->cur_file, filename);
 
     if (inode != NULL) {
-        printf("indoe with name %s has already exist\n", filename);
+        printf("inode with name %s has already exist\n", filename);
         return;
     }
 
@@ -22,6 +23,9 @@ void make(struct Filesystem* fs, struct Session* sess, char* filename, short is_
 
     size_t test = append_data_to_inode(fs, cur_inode_index, str_pointer, 16);
 
+    sess->cur_file = get_inode_pointer(fs, test);
+
+    printf("\n");
     printf("successfully created: \n");
     print_metadata(fs, inode_index);
 }

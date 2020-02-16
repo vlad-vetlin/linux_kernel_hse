@@ -24,12 +24,10 @@ void ls(struct Filesystem* fs, struct Session* sess) {
         print_metadata(fs, inode_index);
         for (i = 0; i < sector_count; ++i) {
             int j;
-
             size_t sector_index = get_sector_index_in_inode(fs, inode_index, i);
             struct Sector* cur_sector_pointer = get_pointer_to_sector(fs, sector_index);
 
             for (j = 0; j < cur_sector_pointer->size; j += 16) {
-
                 struct Inode* inode_pointer = (struct Inode*)get_pointer_in_sector_by_index(fs, sector_index, j / 16);
 
                 size_t cur_inode_index = get_inode_index(fs, inode_pointer);

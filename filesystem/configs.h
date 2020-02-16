@@ -4,11 +4,11 @@
 #include <stdio.h>
 
 // SECTORS
-const size_t SECTOR_SIZE = 64;
+const size_t SECTOR_SIZE = 68;
 const size_t SECTOR_COUNT = 64;
-const size_t SECTOR_FULL_SIZE = 4096;
-#define SECTOR_DATA_SIZE 60
-const size_t SECTOR_INDIRECT_COUNT = 3;
+const size_t SECTOR_FULL_SIZE = 4352;
+#define SECTOR_DATA_SIZE 64
+const size_t SECTOR_INDIRECT_COUNT = 4;
 
 // MAPPERS
 const size_t SECTOR_MAP_SIZE = 4;

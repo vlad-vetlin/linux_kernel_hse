@@ -125,9 +125,10 @@ void* get_pointer_in_sector_by_index(struct Filesystem* fs, size_t sector_index,
     int i;
     char s_index[17];
 
-    if (index > 3) {
+    if (index > SECTOR_DATA_SIZE / 16 - 1) {
         exit(1);
     }
+
     for (i = 0; i < 16; ++i) {
         s_index[i] = sector_pointer->data[16 * index + i];
     }
@@ -137,15 +138,39 @@ void* get_pointer_in_sector_by_index(struct Filesystem* fs, size_t sector_index,
     return (void*) my_atol(s_index, 16);
 }
 
+short remove_pointer_from_sector(struct Filesystem* fs, struct Sector* sector, void* pointer) {
+    size_t sector_index = get_index_to_sector_by_pointer(fs, sector);
+
+    int i;
+    for (i = 0; i < sector->size; i += 16) {
+        void* new_pointer = (struct Inode*)get_pointer_in_sector_by_index(fs, sector_index, i / 16);
+
+        if (new_pointer == pointer) {
+            int last_pointer_first_index = sector->size - 16;
+            int j = last_pointer_first_index;
+
+            for (; j < sector->size; ++j) {
+                sector->data[i + j - last_pointer_first_index] = sector->data[j];
+            }
+
+            sector->size -= 16;
+
+            return 1;
+        }
+    }
+
+    return 0;
+}
+
 char* ltoa(long long val, int len){
 
-    static char buf[16] = {0};
+    char* buf = (char*)malloc(16);
 
     for(; len > 0 ; --len, val /= 16) {
         buf[len - 1] = "0123456789abcdef"[val % 16];
     }
 
-    return &buf[len];
+    return buf;
 
 }
 
