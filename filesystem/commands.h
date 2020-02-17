@@ -27,6 +27,11 @@ void command_parse(struct Filesystem* fs, struct Session* sess) {
 
         scanf("%hd", &is_file);
 
+        if (is_file != 0 || is_file != 1) {
+            printf("is_file param should be 0 or 1\n");
+            return;
+        }
+
         make(fs, sess, filename, is_file);
 
 
