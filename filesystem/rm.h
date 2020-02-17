@@ -18,8 +18,6 @@ void remove_command(struct Filesystem* fs, struct Session* sess, char* filename)
 
     short result = remove_pointer_from_inode(fs, inode->parent_inode, get_inode_index(fs, inode));
 
-    printf("lalka: %d\n", result);
-
     if (result == 1) {
         printf("file was deleted successfully\n");
     } else {

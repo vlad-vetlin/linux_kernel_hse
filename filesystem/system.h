@@ -88,7 +88,6 @@ void init_filesystem(struct Filesystem* fs) {
     int i;
 
     fs->sector_map = (unsigned char*)malloc(SECTOR_MAP_SIZE);
-    fs->sector_map = (unsigned char*)malloc(SECTOR_MAP_SIZE);
     fs->inode_map = (unsigned char*)malloc(INODE_MAP_SIZE);
     fs->inode_system = (struct Inode*)malloc(INODE_FULL_SIZE);
     fs->sectors = (struct Sector*)malloc(SECTOR_FULL_SIZE);
@@ -107,28 +106,15 @@ void init_filesystem(struct Filesystem* fs) {
 
         for (i = 0; i < SECTOR_COUNT; ++i) {
             if (check_bit_by_index(fs->sector_map, i)) {
-                printf("1");
                 read_sector(fs, i, fs->fin);
-            } else {
-                printf("0");
             }
         }
-
-        printf("\n");
 
         for (i = 0; i < INODE_COUNT; ++i) {
             if (check_bit_by_index(fs->inode_map, i)) {
-                printf("1");
                 read_inode(fs, i, fs->fin);
-            } else {
-                printf("0");
             }
         }
-
-        printf("\n");
-
-        printf("%ld\n", get_number_of_first_empty(fs->sector_map, SECTOR_MAP_SIZE));
-        printf("%ld\n", get_number_of_first_empty(fs->inode_map, INODE_MAP_SIZE));
 
         fclose(fs->fin);
     } else {
@@ -205,7 +191,7 @@ size_t find_index_of_root_inode(struct Filesystem* fs) {
         if (check_bit_by_index(fs->inode_map, i) && inode_is_root(fs, i)) {
             return i;
         }
-    }
+    } //aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
 }
 
 #endif //FILESYSTEM_SYSTEM_H

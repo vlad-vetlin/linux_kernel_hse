@@ -11,8 +11,10 @@ void clear_inode(struct Filesystem* fs, size_t inode_index);
 
 struct Inode* get_inode_pointer(struct Filesystem* fs, size_t inode_index);
 size_t get_inode_index(struct Filesystem* fs, struct Inode* inode_pointer);
-size_t append_data_to_inode(struct Filesystem* fs, size_t inode_index, char* data, size_t input_data_size);
+void append_data_to_inode(struct Filesystem* fs, size_t inode_index, char* data, size_t input_data_size);
 void set_inode_name(struct Filesystem* fs, size_t inode_index, char* data);
+void create_inode_by_index(struct Filesystem* fs, struct Inode* parent_inode, short is_file, size_t inode_index);
+void print_inode(struct Filesystem* fs, size_t inode_index);
 
 // create new inode with parent_inode and file.
 // without checking parent node. Only set value
@@ -152,8 +154,8 @@ size_t get_filled_sectors(struct Filesystem* fs, size_t inode_index) {
 }
 
 // create new inode with indirect level. IMPORTANT needed indirect level after this will work bad
-size_t create_inode_with_indirect_level(struct Filesystem* fs, struct Inode* parent_inode, short is_file, size_t indirect_level) {
-    size_t inode_index = create_inode(fs, parent_inode, is_file);
+void create_inode_with_indirect_level(struct Filesystem* fs, struct Inode* parent_inode, short is_file, size_t indirect_level, size_t inode_index) {
+    create_inode_by_index(fs, parent_inode, is_file, inode_index);
 
     int i;
 
@@ -161,14 +163,13 @@ size_t create_inode_with_indirect_level(struct Filesystem* fs, struct Inode* par
         size_t sector_count = get_sector_count_by_indirect_level(i);
 
         int j;
+
         for (j = 0; j < sector_count; ++j) {
-            size_t sector_index = get_sector_index_in_inode(fs, inode_index, j);
+            size_t sector_index = get_sector_index_in_inode_by_indirect_level(fs, inode_index, i, j);
 
             make_sector_indirect(fs, sector_index);
         }
     }
-
-    return inode_index;
 }
 
 short remove_pointer_from_inode(struct Filesystem* fs, struct Inode* inode, size_t index) {
@@ -189,29 +190,30 @@ short remove_pointer_from_inode(struct Filesystem* fs, struct Inode* inode, size
     return 0;
 }
 
+size_t create_tmp_inode(struct Filesystem* fs, struct Inode* inode) {
+    size_t index = get_number_of_first_empty(fs->inode_map, INODE_MAP_SIZE);
+
+    reserve_on_map(fs->inode_map, index);
+
+    fs->inode_system[index].sector_pointer = inode->sector_pointer;
+    fs->inode_system[index].size = inode->size;
+
+    return index;
+}
+
 
 // add indirect level to inode
-size_t add_indirect_level_to_inode(struct Filesystem* fs, size_t inode_index) {
+void add_indirect_level_to_inode(struct Filesystem* fs, size_t inode_index) {
     struct Inode inode = fs->inode_system[inode_index];
 
     size_t cur_indirect_level = needed_inode_indirect_level(inode.size);
 
-    size_t new_inode_index = create_inode_with_indirect_level(fs, inode.parent_inode, inode.is_file, cur_indirect_level + 1);
-    set_inode_name(fs, new_inode_index, inode.name);
+    size_t new_inode_index = create_tmp_inode(fs, &inode);
+    create_inode_with_indirect_level(fs, inode.parent_inode, inode.is_file, cur_indirect_level + 1, inode_index);
 
-    copy_inode(fs, new_inode_index, inode_index, cur_indirect_level + 1);
+    copy_inode(fs, inode_index, new_inode_index, cur_indirect_level + 1);
 
-    struct Inode* inode_pointer = get_inode_pointer(fs, inode_index);
-    if (inode_pointer->parent_inode != NULL) {
-        remove_pointer_from_inode(fs, inode_pointer->parent_inode, inode_index);
-
-        char* str_pointer = ltoa(new_inode_index, 16);
-        size_t test = append_data_to_inode(fs, get_inode_index(fs, inode_pointer->parent_inode), str_pointer, 16);
-    }
-
-    delete_inode(fs, inode_index);
-
-    return new_inode_index;
+    delete_inode(fs, new_inode_index);
 }
 
 // decrement indirect level
@@ -243,41 +245,46 @@ void remove_all_sectors_in_inode(struct Filesystem* fs, size_t inode_index) {
     }
 }
 
+
+void create_inode_by_index(struct Filesystem* fs, struct Inode* parent_inode, short is_file, size_t inode_index) {
+    if (!check_bit_by_index(fs->inode_map, inode_index)) {
+        reserve_on_map(fs->inode_map, inode_index);
+
+        fs->inode_system[inode_index].name = "";
+        fs->inode_system[inode_index].is_file = is_file;
+        fs->inode_system[inode_index].parent_inode = parent_inode;
+    }
+
+    fs->inode_system[inode_index].size = 0;
+    size_t sector_index = make_sector(fs);
+
+    fs->inode_system[inode_index].sector_pointer = get_pointer_to_sector(fs, sector_index);
+}
+
 // create new inode
 size_t create_inode(struct Filesystem* fs, struct Inode* parent_inode, short is_file) {
     size_t inode_index = get_number_of_first_empty(fs->inode_map, INODE_COUNT);
 
-    reserve_on_map(fs->inode_map, inode_index);
-
-    fs->inode_system[inode_index].name = "";
-    fs->inode_system[inode_index].is_file = is_file;
-    fs->inode_system[inode_index].size = 0;
-    fs->inode_system[inode_index].parent_inode = parent_inode;
-
-    size_t sector_index = make_sector(fs);
-
-    fs->inode_system[inode_index].sector_pointer = get_pointer_to_sector(fs, sector_index);
+    create_inode_by_index(fs, parent_inode, is_file, inode_index);
 
     return inode_index;
 }
 
 // append data to the end of inode
-size_t append_data_to_inode(struct Filesystem* fs, size_t inode_index, char* data, size_t input_data_size) {
+void append_data_to_inode(struct Filesystem* fs, size_t inode_index, char* data, size_t input_data_size) {
     size_t inode_size = fs->inode_system[inode_index].size;
     size_t new_size = inode_size + input_data_size;
 
     size_t new_indirect_level = needed_inode_indirect_level(new_size);
 
-    size_t new_inode_index = inode_index;
-
     if (new_indirect_level != needed_inode_indirect_level(inode_size)) {
-        new_inode_index = add_indirect_level_to_inode(fs, inode_index);
+        add_indirect_level_to_inode(fs, inode_index);
     }
 
-    size_t cur_sector_index_in_inode = get_filled_sectors(fs, new_inode_index) - 1;
+    size_t cur_sector_index_in_inode = get_filled_sectors(fs, inode_index) - 1;
 
     while (input_data_size > 0) {
-        size_t sector_index = get_sector_index_in_inode_by_indirect_level(fs, new_inode_index, new_indirect_level, cur_sector_index_in_inode);
+        size_t sector_index = get_sector_index_in_inode_by_indirect_level(fs, inode_index, new_indirect_level, cur_sector_index_in_inode);
 
         size_t appended_size = append_to_sector(fs, sector_index, data, input_data_size);
 
@@ -291,9 +298,7 @@ size_t append_data_to_inode(struct Filesystem* fs, size_t inode_index, char* dat
         ++cur_sector_index_in_inode;
     }
 
-    fs->inode_system[new_inode_index].size = new_size;
-
-    return new_inode_index;
+    fs->inode_system[inode_index].size = new_size;
 }
 
 // clear all data in inode
@@ -319,11 +324,20 @@ struct Inode* get_inode_pointer(struct Filesystem* fs, size_t inode_index) {
     return &(fs->inode_system[inode_index]);
 }
 
+long int get_parent_index(struct Filesystem* fs, struct Inode* inode) {
+    if (inode->parent_inode == NULL) {
+        return -1;
+    } else {
+        return get_inode_index(fs, inode->parent_inode);
+    }
+}
+
 // print all metadata in inode
 void print_metadata(struct Filesystem* fs, size_t inode_index) {
     struct Inode* inode = get_inode_pointer(fs, inode_index);
 
-    printf("is_file: %d, name: %s, size: %ld, real_size: %ld\n", inode->is_file, inode->name, inode->size, get_inode_real_size(fs, inode_index));
+    printf("is_file: %d, name: %s, size: %ld, real_size: %ld ", inode->is_file, inode->name, inode->size, get_inode_real_size(fs, inode_index));
+    printf("inode_index: %ld, parent_inode_index: %ld\n", get_inode_index(fs, inode), get_parent_index(fs, inode));
 }
 
 size_t get_inode_index(struct Filesystem* fs, struct Inode* inode_pointer) {

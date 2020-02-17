@@ -28,10 +28,14 @@ void command_parse(struct Filesystem* fs, struct Session* sess) {
         scanf("%hd", &is_file);
 
         make(fs, sess, filename, is_file);
+
+
     } else if (strcmp(command_name, "cd") == 0) {
         char* filename = get_string();
 
         change_dir(fs, sess, filename);
+
+        free(filename);
     } else if (strcmp(command_name, "echo") == 0) {
         char* filename = get_string();
         char data[100];
@@ -47,16 +51,30 @@ void command_parse(struct Filesystem* fs, struct Session* sess) {
         fgets(data, len + 1, stdin);
 
         echo(fs, sess, filename, data);
+
+        free(filename);
     } else if (strcmp(command_name, "cat") == 0) {
         char* filename = get_string();
 
         cat(fs, sess, filename);
+
+        free(filename);
     } else if (strcmp(command_name, "rm") == 0) {
         char* filename = get_string();
 
         remove_command(fs, sess, filename);
+
+        free(filename);
     } else if (strcmp(command_name, "save") == 0) {
         save_filesystem(fs);
+
+        printf("system was saved successfully\n");
+    } else if (strcmp(command_name, "exit") == 0) {
+        free_filesystem(fs);
+
+        printf("system was saved successfully\n");
+
+        exit(0);
     }
 }
 

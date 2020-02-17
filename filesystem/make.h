@@ -21,9 +21,7 @@ void make(struct Filesystem* fs, struct Session* sess, char* filename, short is_
     char* str_pointer = ltoa(inode_index, 16);
     size_t cur_inode_index = get_inode_index(fs, sess->cur_file);
 
-    size_t test = append_data_to_inode(fs, cur_inode_index, str_pointer, 16);
-
-    sess->cur_file = get_inode_pointer(fs, test);
+    append_data_to_inode(fs, cur_inode_index, str_pointer, 16);
 
     printf("\n");
     printf("successfully created: \n");
