@@ -118,7 +118,7 @@ void init_filesystem(struct Filesystem* fs) {
 
         fclose(fs->fin);
     } else {
-        size_t root_inode = create_inode_with_name(fs, NULL, 0, "test");
+        create_inode_with_name(fs, NULL, 0, "test");
     }
 
 
@@ -191,7 +191,9 @@ size_t find_index_of_root_inode(struct Filesystem* fs) {
         if (check_bit_by_index(fs->inode_map, i) && inode_is_root(fs, i)) {
             return i;
         }
-    } //aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+    }
+
+    exit(1);
 }
 
 #endif //FILESYSTEM_SYSTEM_H

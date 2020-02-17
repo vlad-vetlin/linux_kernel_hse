@@ -133,8 +133,6 @@ size_t get_pointer_in_sector_by_index(struct Filesystem* fs, size_t sector_index
         s_index[i] = sector_pointer->data[16 * index + i];
     }
 
-//    s_index[16] = '\0';
-
     return (size_t) my_atol(s_index, 16);
 }
 
