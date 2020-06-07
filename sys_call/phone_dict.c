@@ -18,6 +18,11 @@ static unsigned int users_size;
 
 const unsigned int PHONE_SIZE = 3;
 
+void printLog(char* str)
+{
+    printk(KERN_INFO "phone_dict: %s\n", str);
+}
+
 struct user_data {
     char* surname;
     unsigned int len;
@@ -113,19 +118,21 @@ long get_user_index(const char* surname, unsigned int len){
     return -1;
 }
 
-
-char* get_user(const char* surname, unsigned int len)
+long get_user(const char* surname, unsigned int len, struct user_data* user)
 {
     long user_index = get_user_index(surname, len);
-    struct user_data* data;
 
     if (user_index == -1) {
-        return "\0";
+        return 1;
     }
 
-    data = get_user_data(user_index);
+    struct user_data* data = get_user_data(user_index);
 
-    return data->phone;
+    user->phone = data->phone;
+    user->surname = data->surname;
+    user->len = data->len;
+
+    return 0;
 }
 
 long add_user(struct user_data* input_data)
@@ -151,11 +158,6 @@ long del_user(const char* surname, unsigned int len)
     pop_user();
 
     return 0;
-}
-
-void printLog(char* str)
-{
-    printk(KERN_INFO "phone_dict: %s\n", str);
 }
 
 
@@ -197,23 +199,38 @@ static int __init phone_dict_init(void)
     printLog(data2->phone);
 
     add_user(data1);
+    struct user_data output;
 
     printLog("answer: 888");
-    printLog(get_user("Vlad", 4));
+    printk(KERN_INFO "%ld\n", &output);
+    printk(KERN_INFO "%ld\n", get_user("Vlad", 4, &output));
+    printk(KERN_INFO "%ld\n", &output);
+    printLog(output.phone);
 
     add_user(data2);
 
     printLog("answer: 999");
-    printLog(get_user("Dimas", 5));
+    printk(KERN_INFO "%ld\n", get_user("Dimas", 5, &output));
+    printLog(output.phone);
     printLog("answer: 888");
-    printLog(get_user("Vlad", 4));
+    printk(KERN_INFO "%ld\n", get_user("Vlad", 4, &output));
+    printLog(output.phone);
 
     del_user("Vlad", 4);
 
     printLog("answer: 999");
-    printLog(get_user("Dimas", 5));
+    printk(KERN_INFO "%ld\n", get_user("Dimas", 5, &output));
+    printLog(output.phone);
     printLog("answer: ");
-    printLog(get_user("Vlad", 4));
+    printk(KERN_INFO "%ld\n", get_user("Vlad", 4, &output));
+
+    add_user(data1);
+    printLog("answer: 999");
+    printk(KERN_INFO "%ld\n", get_user("Dimas", 5, &output));
+    printLog(output.phone);
+    printLog("answer: 888");
+    printk(KERN_INFO "%ld\n", get_user("Vlad", 4, &output));
+    printLog(output.phone);
 
     printLog("that all");
     return 0;
